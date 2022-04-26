@@ -1,0 +1,22 @@
+def optimize_dataframe(df):
+    int_cols = [col_name for col_name in df.columns if df.dtypes[col_name] in ["int", "int32", "int64"]]
+    float_cols = [
+        col_name
+        for col_name in df.columns
+        if df.dtypes[col_name] in ["float", "float32", "float64"] and abs(df[col_name].max()) < FLOAT_OPT_THRESHOLD
+    ]
+    opt_cols = set(int_cols + float_cols)
+    other_cols = [col_name for col_name in df.columns if col_name not in opt_cols]
+
+    df_opt = pd.DataFrame()
+    if len(int_cols) > 0:
+        df_opt[int_cols] = df[int_cols].apply(pd.to_numeric, downcast="integer")
+
+    if len(float_cols) > 0:
+        df_opt[float_cols] = df[float_cols].apply(pd.to_numeric, downcast="float")
+
+    if len(other_cols) > 0:
+        df_opt[other_cols] = df[other_cols]
+
+    return df_opt
+
